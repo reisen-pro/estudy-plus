@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: estudy-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: estudy123
+      MYSQL_DATABASE: estudy_plus
+      MYSQL_CHARACTER_SET_SERVER: utf8mb4
+      MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --init-connect='SET NAMES utf8mb4' --skip-character-set-client-handshake
+    networks:
+      - estudy-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uestudy123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: estudy-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - estudy-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: estudy-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      JAVA_OPTS: "-Xms256m -Xmx512m"
+      DINGTALK_APP_KEY: ${DINGTALK_APP_KEY:-ding_xxxxxxx}
+      DINGTALK_APP_SECRET: ${DINGTALK_APP_SECRET:-xxxxxx}
+      DINGTALK_AGENT_ID: ${DINGTALK_AGENT_ID:-123456789}
+      DINGTALK_CALLBACK_URL: ${DINGTALK_CALLBACK_URL:-http://localhost:8080/api/dingtalk/callback}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - estudy-net
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: estudy-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./frontend/dist:/usr/share/nginx/html:ro
+    depends_on:
+      - app
+    networks:
+      - estudy-net
+    restart: unless-stopped
+
+networks:
+  estudy-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
