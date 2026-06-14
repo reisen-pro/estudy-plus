@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public Result<?> handleBusinessException(BusinessException e) {
         log.warn("业务异常: {}", e.getMessage());
-        return Result.fail(e.getCode(), e.getMessage());
+        return Result.error(e.getCode(), e.getMessage());
     }
 
     /**
@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .reduce((a, b) -> a + "; " + b)
                 .orElse("参数校验失败");
-        return Result.fail(400, msg);
+        return Result.error(400, msg);
     }
 
     /**
@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
                 .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
                 .reduce((a, b) -> a + "; " + b)
                 .orElse("参数绑定失败");
-        return Result.fail(400, msg);
+        return Result.error(400, msg);
     }
 
     /**
@@ -68,6 +68,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<?> handleException(Exception e) {
         log.error("系统异常", e);
-        return Result.fail("系统繁忙，请稍后重试");
+        return Result.error("系统繁忙，请稍后重试");
     }
 }

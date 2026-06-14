@@ -23,7 +23,7 @@ public class LearningController {
     public Result<Void> recordProgress(@RequestBody @Valid LearningProgressDTO dto) {
         Long userId = (Long) request.getAttribute("userId");
         progressService.recordProgress(userId, dto);
-        return Result.success(null);
+        return Result.success();
     }
 
     /** 查询用户在某课程的总进度 */

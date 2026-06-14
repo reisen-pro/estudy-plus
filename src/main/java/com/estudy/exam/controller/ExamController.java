@@ -20,8 +20,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/exam")
@@ -70,7 +68,7 @@ public class ExamController {
     @PutMapping("/paper/{id}/publish")
     public Result<Void> publishPaper(@PathVariable Long id) {
         examService.publishPaper(id);
-        return Result.success(null);
+        return Result.success();
     }
 
     /** 试卷列表（兼容 /list） */
@@ -125,10 +123,10 @@ public class ExamController {
         Long userId = getCurrentUserId(request);
         ExamRecord record = recordMapper.selectById(dto.getRecordId());
         if (record == null || !record.getUserId().equals(userId)) {
-            return Result.fail("无权操作");
+            return Result.error("无权操作");
         }
         if (record.getStatus() != 0) {
-            return Result.fail("已交卷，不可修改");
+            return Result.error("已交卷，不可修改");
         }
         ExamAnswer existing = answerMapper.selectOne(
                 new LambdaQueryWrapper<ExamAnswer>()
@@ -145,7 +143,7 @@ public class ExamController {
             answer.setUserAnswer(dto.getUserAnswer());
             answerMapper.insert(answer);
         }
-        return Result.success(null);
+        return Result.success();
     }
 
     /** 提交考试(整体交卷) */

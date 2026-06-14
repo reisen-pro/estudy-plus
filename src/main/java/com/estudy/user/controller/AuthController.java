@@ -38,11 +38,11 @@ public class AuthController {
     public Result<LoginVO> userInfo(HttpServletRequest request) {
         Long userId = (Long) request.getAttribute("userId");
         if (userId == null) {
-            return Result.fail(401, "未登录");
+            return Result.error(401, "未登录");
         }
         SysUser user = userMapper.selectById(userId);
         if (user == null) {
-            return Result.fail("用户不存在");
+            return Result.error("用户不存在");
         }
         LoginVO vo = new LoginVO();
         vo.setUserId(user.getId());

@@ -72,7 +72,7 @@ public class CommunityController {
     @DeleteMapping("/post/{id}")
     public Result<Void> deletePost(@PathVariable Long id) {
         postService.removeById(id);
-        return Result.success(null);
+        return Result.success();
     }
 
     // ========== 评论 ==========
@@ -158,7 +158,7 @@ public class CommunityController {
     @PutMapping("/notification/{id}/read")
     public Result<Void> markRead(@PathVariable Long id) {
         notificationService.markRead(id, currentUserId());
-        return Result.success(null);
+        return Result.success();
     }
 
     /**
@@ -167,6 +167,6 @@ public class CommunityController {
     @PutMapping("/notification/read-all")
     public Result<Void> markAllRead() {
         notificationService.markAllRead(currentUserId());
-        return Result.success(null);
+        return Result.success();
     }
 }

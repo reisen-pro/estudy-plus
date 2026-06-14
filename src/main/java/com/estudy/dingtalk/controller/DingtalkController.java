@@ -52,7 +52,7 @@ public class DingtalkController {
     public Result<Void> bindDingtalk(@RequestBody @Valid DingtalkBindDTO dto) {
         Long userId = (Long) request.getAttribute("userId");
         authService.bindDingtalk(userId, dto.getDingUserId(), dto.getDingName(), dto.getDingAvatar());
-        return Result.success(null);
+        return Result.success();
     }
 
     /**
@@ -62,7 +62,7 @@ public class DingtalkController {
     public Result<Void> unbindDingtalk() {
         Long userId = (Long) request.getAttribute("userId");
         authService.unbindDingtalk(userId);
-        return Result.success(null);
+        return Result.success();
     }
 
     /**
@@ -75,6 +75,6 @@ public class DingtalkController {
             case "exam_notice" -> notifyService.sendExamNotice(dto.getUserId(), dto.getTitle(), dto.getContent());
             default -> notifyService.sendMarkdownNotice(dto.getUserId(), dto.getMsgType(), dto.getTitle(), dto.getContent(), dto.getBizId());
         }
-        return Result.success(null);
+        return Result.success();
     }
 }

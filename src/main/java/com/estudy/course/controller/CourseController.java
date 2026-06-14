@@ -83,7 +83,7 @@ public class CourseController {
         course.setCourseType(dto.getCourseType());
         course.setPrice(dto.getPrice());
         courseService.updateById(course);
-        return Result.success(null);
+        return Result.success();
     }
 
     /** 发布课程（需要 course:manage 权限） */
@@ -94,7 +94,7 @@ public class CourseController {
             throw new BusinessException("您没有管理课程的权限");
         }
         courseService.publishCourse(id);
-        return Result.success(null);
+        return Result.success();
     }
 
     /** 下架课程（需要 course:manage 权限） */
@@ -105,7 +105,7 @@ public class CourseController {
             throw new BusinessException("您没有管理课程的权限");
         }
         courseService.unpublishCourse(id);
-        return Result.success(null);
+        return Result.success();
     }
 
     /** 删除课程（需要 course:delete 权限） */
@@ -116,7 +116,7 @@ public class CourseController {
             throw new BusinessException("您没有删除课程的权限");
         }
         courseService.removeById(id);
-        return Result.success(null);
+        return Result.success();
     }
 
     /** 我的课程 - 必须在 /{id} 之前 */
@@ -158,7 +158,7 @@ public class CourseController {
     public Result<Void> recordProgress(@RequestBody @Valid LearningProgressDTO dto, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         learningProgressService.recordProgress(userId, dto);
-        return Result.success(null);
+        return Result.success();
     }
 
     /** 查询课程进度 */

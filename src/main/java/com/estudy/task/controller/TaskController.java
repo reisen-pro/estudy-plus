@@ -48,7 +48,7 @@ public class TaskController {
     public Result<Void> completeLearn(@PathVariable Long taskId, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         taskService.completeLearn(userId, taskId);
-        return Result.success(null);
+        return Result.success();
     }
 
     /** 检查是否可以开始考试 */
