@@ -2,9 +2,11 @@ package com.estudy.common.exception;
 
 import com.estudy.common.result.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
@@ -69,5 +71,16 @@ public class GlobalExceptionHandler {
     public Result<?> handleException(Exception e) {
         log.error("系统异常", e);
         return Result.error("系统繁忙，请稍后重试");
+    }
+
+    /**
+     * 权限异常
+     * 捕获所有未处理的异常
+     */
+    @ExceptionHandler(PermissionException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Result<Void> handlePermissionException(PermissionException e) {
+        log.warn("权限异常：{}", e.getMessage());
+        return Result.error(e.getCode(), e.getMessage());
     }
 }

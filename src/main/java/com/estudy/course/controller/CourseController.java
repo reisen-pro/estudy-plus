@@ -1,9 +1,9 @@
 package com.estudy.course.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.estudy.common.exception.BusinessException;
 import com.estudy.common.result.Result;
+import com.estudy.common.annotation.permission.RequirePermission;
 import com.estudy.course.dto.CourseCreateDTO;
 import com.estudy.course.dto.CourseQueryDTO;
 import com.estudy.course.dto.LearningProgressDTO;
@@ -12,7 +12,6 @@ import com.estudy.course.entity.CourseChapter;
 import com.estudy.course.service.CourseChapterService;
 import com.estudy.course.service.CourseService;
 import com.estudy.course.service.LearningProgressService;
-import com.estudy.rbac.service.RbacService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +35,6 @@ public class CourseController {
     private final CourseService courseService;
     private final CourseChapterService chapterService;
     private final LearningProgressService learningProgressService;
-    private final RbacService rbacService;
 
     /**
      * 获取当前登录用户ID
@@ -55,23 +53,21 @@ public class CourseController {
 
     // ========== 课程 CRUD ==========
 
-    /** 创建课程（需要 course:upload 权限） */
+    /**
+     * 创建课程（需要 course:upload 权限）
+     */
     @PostMapping
-    public Result<Long> create(@RequestBody @Valid CourseCreateDTO dto, HttpServletRequest request) {
-        Long userId = getCurrentUserId(request);
-        if (!rbacService.hasPermission(userId, "course:upload")) {
-            throw new BusinessException("您没有上传课程的权限，请先申请");
-        }
+    @RequirePermission("course:upload")
+    public Result<Long> create(@RequestBody @Valid CourseCreateDTO dto) {
         return Result.success(courseService.createCourse(dto));
     }
 
-    /** 更新课程（需要 course:manage 权限） */
+    /**
+     * 更新课程（需要 course:manage 权限）
+     */
     @PutMapping("/{id}")
-    public Result<Void> update(@PathVariable Long id, @RequestBody CourseCreateDTO dto, HttpServletRequest request) {
-        Long userId = getCurrentUserId(request);
-        if (!rbacService.hasPermission(userId, "course:manage")) {
-            throw new BusinessException("您没有管理课程的权限");
-        }
+    @RequirePermission("course:manage")
+    public Result<Void> update(@PathVariable Long id, @RequestBody CourseCreateDTO dto) {
         Course course = courseService.getById(id);
         if (course == null) throw new BusinessException("课程不存在");
         course.setTitle(dto.getTitle());
@@ -86,47 +82,48 @@ public class CourseController {
         return Result.success();
     }
 
-    /** 发布课程（需要 course:manage 权限） */
+    /**
+     * 发布课程（需要 course:manage 权限）
+     */
     @PutMapping("/{id}/publish")
-    public Result<Void> publish(@PathVariable Long id, HttpServletRequest request) {
-        Long userId = getCurrentUserId(request);
-        if (!rbacService.hasPermission(userId, "course:manage")) {
-            throw new BusinessException("您没有管理课程的权限");
-        }
+    @RequirePermission("course:manage")
+    public Result<Void> publish(@PathVariable Long id) {
         courseService.publishCourse(id);
         return Result.success();
     }
 
-    /** 下架课程（需要 course:manage 权限） */
+    /**
+     * 下架课程（需要 course:manage 权限）
+     */
     @PutMapping("/{id}/unpublish")
-    public Result<Void> unpublish(@PathVariable Long id, HttpServletRequest request) {
-        Long userId = getCurrentUserId(request);
-        if (!rbacService.hasPermission(userId, "course:manage")) {
-            throw new BusinessException("您没有管理课程的权限");
-        }
+    @RequirePermission("course:manage")
+    public Result<Void> unpublish(@PathVariable Long id) {
         courseService.unpublishCourse(id);
         return Result.success();
     }
 
-    /** 删除课程（需要 course:delete 权限） */
+    /**
+     * 删除课程（需要 course:delete 权限）
+     */
     @DeleteMapping("/{id}")
-    public Result<Void> delete(@PathVariable Long id, HttpServletRequest request) {
-        Long userId = getCurrentUserId(request);
-        if (!rbacService.hasPermission(userId, "course:delete")) {
-            throw new BusinessException("您没有删除课程的权限");
-        }
+    @RequirePermission("course:delete")
+    public Result<Void> delete(@PathVariable Long id) {
         courseService.removeById(id);
         return Result.success();
     }
 
-    /** 我的课程 - 必须在 /{id} 之前 */
+    /**
+     * 我的课程 - 必须在 /{id} 之前
+     */
     @GetMapping("/my")
     public Result<List<Course>> myCourses(HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
         return Result.success(courseService.getMyCourses(userId));
     }
 
-    /** 课程详情(含章节目录) */
+    /**
+     * 课程详情(含章节目录)
+     */
     @GetMapping("/{id}")
     public Result<Course> detail(@PathVariable Long id) {
         Course course = courseService.getById(id);
@@ -138,13 +135,17 @@ public class CourseController {
         return Result.success(course);
     }
 
-    /** 课程列表(兼容 /list 和 /page) */
+    /**
+     * 课程列表(兼容 /list 和 /page)
+     */
     @GetMapping({"/list", "/page"})
     public Result<Page<Course>> list(CourseQueryDTO dto) {
         return Result.success(courseService.pageQuery(dto));
     }
 
-    /** 获取课程目录(章节+课时) */
+    /**
+     * 获取课程目录(章节+课时)
+     */
     @GetMapping("/{id}/catalog")
     public Result<List<CourseChapter>> catalog(@PathVariable Long id) {
         return Result.success(chapterService.getCourseCatalog(id));
@@ -153,7 +154,9 @@ public class CourseController {
 
     // ========== 学习进度（别名路由，映射到 /learning/progress） ==========
 
-    /** 记录学习进度 */
+    /**
+     * 记录学习进度
+     */
     @PostMapping("/progress")
     public Result<Void> recordProgress(@RequestBody @Valid LearningProgressDTO dto, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
@@ -161,7 +164,9 @@ public class CourseController {
         return Result.success();
     }
 
-    /** 查询课程进度 */
+    /**
+     * 查询课程进度
+     */
     @GetMapping("/{id}/progress")
     public Result<Map<String, Object>> courseProgress(@PathVariable Long id, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);

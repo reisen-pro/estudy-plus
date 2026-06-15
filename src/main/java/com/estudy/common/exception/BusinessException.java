@@ -6,17 +6,13 @@ import lombok.Getter;
  * 自定义业务异常
  */
 @Getter
-public class BusinessException extends RuntimeException {
-
-    private final int code;
+public class BusinessException extends BaseException {
 
     public BusinessException(String message) {
-        super(message);
-        this.code = 500;
+        super(message);  // code = 500
     }
 
     public BusinessException(int code, String message) {
-        super(message);
-        this.code = code;
+        super(code, message);  // 透传
     }
 }
