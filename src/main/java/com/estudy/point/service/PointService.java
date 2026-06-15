@@ -1,7 +1,6 @@
 package com.estudy.point.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.estudy.common.exception.BusinessException;
 import com.estudy.course.entity.Course;
 import com.estudy.course.entity.CourseLesson;

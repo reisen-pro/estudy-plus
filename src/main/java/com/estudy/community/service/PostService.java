@@ -1,6 +1,7 @@
 package com.estudy.community.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.estudy.common.exception.BusinessException;
@@ -10,6 +11,7 @@ import com.estudy.community.entity.Like;
 import com.estudy.community.entity.Post;
 import com.estudy.community.mapper.LikeMapper;
 import com.estudy.community.mapper.PostMapper;
+import com.estudy.rbac.entity.SysPermission;
 import com.estudy.user.entity.SysUser;
 import com.estudy.user.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
@@ -112,8 +114,11 @@ public class PostService extends ServiceImpl<PostMapper, Post> {
         Post post = getById(id);
         if (post == null) throw new BusinessException("帖子不存在");
         // 浏览量+1
+        this.update(new LambdaUpdateWrapper<Post>()
+                .eq(Post::getId, id)  // 指定更新条件
+                .setIncrBy(Post::getViewCount, 1));  // setIncrBy 是原子自增
+        // 上面做了自增操作所以下面同步一下
         post.setViewCount(post.getViewCount() + 1);
-        updateById(post);
         // 填充
         fillPostExtra(List.of(post), currentUserId);
         return post;
